@@ -4,10 +4,12 @@ import { motion, useMotionValue, useSpring, useTransform, MotionValue } from "fr
 import { Folder, Terminal, Mail, Github } from "lucide-react";
 import { useWM } from "@/lib/store";
 
-function DockIcon(props: {
+type IconProps = {
   mouseX: MotionValue<number>; label: string; bg: string;
   icon: React.ReactNode; onClick?: () => void; href?: string; running?: boolean;
-}) {
+};
+
+function DockIcon(props: IconProps) {
   const ref = useRef<HTMLDivElement>(null);
   const distance = useTransform(props.mouseX, (val) => {
     const b = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
@@ -16,7 +18,18 @@ function DockIcon(props: {
   const scale = useSpring(useTransform(distance, [-110, 0, 110], [1, 1.45, 1]), {
     stiffness: 260, damping: 18, mass: 0.4,
   });
-  const Comp = (props.href ? motion.a : motion.button) as typeof motion.button;
+
+  const className = `relative flex size-11 items-center justify-center rounded-xl
+                    bg-gradient-to-br ${props.bg} shadow-md ring-1 ring-black/10 dark:ring-white/10`;
+
+  const inner = (
+    <>
+      {props.icon}
+      {props.running && (
+        <span className="absolute -bottom-[6px] size-1 rounded-full bg-black/50 dark:bg-white/60" />
+      )}
+    </>
+  );
 
   return (
     <div ref={ref} className="group relative flex flex-col items-center">
@@ -25,18 +38,21 @@ function DockIcon(props: {
                        opacity-0 group-hover:opacity-100 transition-opacity">
         {props.label}
       </span>
-      <Comp
-        href={props.href} target={props.href ? "_blank" : undefined} rel="noreferrer"
-        onClick={props.onClick}
-        style={{ scale }} whileTap={{ scale: 0.9 }}
-        className={`relative flex size-11 items-center justify-center rounded-xl
-                    bg-gradient-to-br ${props.bg} shadow-md ring-1 ring-black/10 dark:ring-white/10`}
-      >
-        {props.icon}
-        {props.running && (
-          <span className="absolute -bottom-[6px] size-1 rounded-full bg-black/50 dark:bg-white/60" />
-        )}
-      </Comp>
+      {props.href ? (
+        <motion.a
+          href={props.href} target="_blank" rel="noreferrer"
+          style={{ scale }} whileTap={{ scale: 0.9 }} className={className}
+        >
+          {inner}
+        </motion.a>
+      ) : (
+        <motion.button
+          onClick={props.onClick} aria-label={props.label}
+          style={{ scale }} whileTap={{ scale: 0.9 }} className={className}
+        >
+          {inner}
+        </motion.button>
+      )}
     </div>
   );
 }
