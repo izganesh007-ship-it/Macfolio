@@ -19,7 +19,16 @@ function Rig({ children }: { children: React.ReactNode }) {
   return <group ref={ref}>{children}</group>;
 }
 
-function Blob({ position, color, size = 1.4, distort = 0.35, speed = 1.4, wireframe = false }) {
+type BlobProps = {
+  position: [number, number, number];
+  color: string;
+  size?: number;
+  distort?: number;
+  speed?: number;
+  wireframe?: boolean;
+};
+
+function Blob({ position, color, size = 1.4, distort = 0.35, speed = 1.4, wireframe = false }: BlobProps) {
   const mesh = useRef<THREE.Mesh>(null);
   useFrame((_, delta) => {
     if (mesh.current) { mesh.current.rotation.x += delta * 0.08; mesh.current.rotation.y += delta * 0.1; }
